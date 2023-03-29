@@ -19,7 +19,7 @@ def tmp(a):
 
 
 if __name__ == "__main__":
-    img_path = "test_images/30_1.jpg"  # path to image which we interested in.
+    img_path = "30_1.jpg"  # path to image which we interested in.
     img = cv2.imread(img_path)
     img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
     text_color = (0, 0, 255)
