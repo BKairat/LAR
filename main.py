@@ -2,44 +2,57 @@
 The main Python file which used for detecting the objects of certain colors ([68, 59, 102] RBG format),
 and asle capable to predict at what angle the robot took the picture.
 """
-
-from image_analysis import analysisRGB
 import cv2
-from geometry import box_aploximation, segment_length_ratio
-from neuron_web import predict_angle
-import numpy as np
-
-
-def tmp(a):
-    s_ret = ''
-    for i in str(a):
-        if i not in "()[],": s_ret += i
-    ret = [int(x) for x in s_ret.split(' ')]
-    return ret
+from image_analysis import analysisRGB, getAngleToColor, isEntry
+from map import Map
 
 
 if __name__ == "__main__":
-    img_path = "30_1.jpg"  # path to image which we interested in.
-    img = cv2.imread(img_path)
-    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-    text_color = (0, 0, 255)
-    objects, centers, hsv, color = analysisRGB(img)
+    #
+    # l = [str(i) for i in range(1, 5)]
+    #
+    # for i in l:
+        img_path = "map_images/sc"+"41"+".png"
+        img = cv2.imread(img_path)
 
-    apr =[]
+        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
-    for box in objects:
-        cv2.drawContours(img, [box], 0, (255, 0, 0), 2)
-        apr.append(box_aploximation(box))
-    apr = (segment_length_ratio(tmp(apr)))
+        mapa = Map()
+        mapa.mapClear()
+        garage, obstacles = analysisRGB(img)
+        # mapa.mapClear()
 
-    cv2.putText(img, str(predict_angle(np.array([apr])))+" degrees", (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, text_color, 2)
+        for i in obstacles:
+            for j in i:
+                mapa.drawObstacle(j.dist, j.angleMap, j.color)
+                cv2.drawContours(img, [j.contour], 0, (0, 255, 0), 1)
+        if garage.angleP:
+            mapa.drawGarage(garage.dist[0], garage.angleMap[0], garage.angleP, garage.entry)
+            for i in garage.contour:
+                cv2.drawContours(img, [i], -1, (0, 255, 0), 1)
+        elif garage.entry:
+            print(garage.dist, garage.angleMap, garage.angleP, garage.entry)
+            mapa.drawGarage(garage.dist, garage.angleMap, garage.angleP, garage.entry)
+        else:
+            mapa.drawGarage(garage.dist, garage.angleMap, garage.angleP, garage.entry)
 
-    while True:
-        cv2.imshow("other_images", img)  # shows image
-
-        # break if you press esc
-        if cv2.waitKey(0) & 0xFF == 27:
-            break
+        dist, rot = mapa.bfs()
+        print(dist, "\n", rot)
+        mapa.drawRobot()
 
 
+        while True:
+            cv2.imshow("file", img)  # shows image
+            if cv2.waitKey(0) & 0xFF == ord('q'):
+                # mapa.drawCircle(200, 200, 210, "WHITE")
+                # del mapa
+                # mapa = Map()
+                break
 
+            if cv2.waitKey(0) & 0xFF == ord('m'):
+                mapa.showMap()
+                # mapa.drawCircle(200, 200, 210, "WHITE")
+                # del mapa
+                # mapa = Map()
+                break
+        # mapa.mapClear()
