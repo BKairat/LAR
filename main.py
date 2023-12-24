@@ -8,7 +8,7 @@ from map import Map
 
 
 if __name__ == "__main__":
-        img_path = "map_images/sc"+"3"+".png"
+        img_path = "map_images/sc18.png"
         img = cv2.imread(img_path)
 
         img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
